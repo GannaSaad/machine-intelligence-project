@@ -11,7 +11,6 @@ rf = joblib.load("rf_model.pkl")      # RandomForestClassifier
 knn = joblib.load("knn_model.pkl")    # KNeighborsClassifier
 
 scaler = joblib.load("scaler.pkl")    # StandardScaler
-imputer = joblib.load("imputer.pkl")  # SimpleImputer
 encoder = joblib.load("label_encoder.pkl")  # LabelEncoder
 
 models = [svm, lr, rf, knn]
@@ -34,14 +33,14 @@ for f in feature_names:
 if st.button("Predict"):
     # Create DataFrame
     X = pd.DataFrame([inputs], columns=feature_names)
+    X = X.astype(float)  # Ensure numeric
 
-    # ---- Preprocessing outside the model ----
-    X_imp = imputer.transform(X)      # Handle missing values
-    X_scaled = scaler.transform(X_imp)  # Scale features
+    # ---- Scale features ----
+    X_scaled = scaler.transform(X)
 
     st.subheader("Individual Model Predictions")
-
     preds = []
+
     for name, model in zip(model_names, models):
         pred = model.predict(X_scaled)[0]
         preds.append(pred)
