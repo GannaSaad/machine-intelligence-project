@@ -5,12 +5,14 @@ import pandas as pd
 from scipy.stats import mode
 
 # ---- Load models ----
-svm = joblib.load("svm.pkl")
-lr = joblib.load("lr_model.pkl")
-scaler = joblib.load("scaler.pkl")  # if used
+svm = joblib.load("svm.pkl")          # SVC
+lr = joblib.load("lr_model.pkl")      # LogisticRegression
+rf = joblib.load("rf_model.pkl")      # RandomForestClassifier
+knn = joblib.load("knn_model.pkl")    # KNeighborsClassifier
+scaler = joblib.load("scaler.pkl")
 
-models = [svm, lr]
-model_names = ["SVM", "Logistic Regression"]
+models = [svm, lr, rf, knn]
+model_names = ["SVM", "Logistic Regression", "Random Forest", "kNN"]
 
 labels = ['Away Win', 'Draw', 'Home Win']
 
@@ -33,17 +35,21 @@ if st.button("Predict"):
     X_scaled = scaler.transform(X)
 
     st.subheader("Individual Model Predictions")
+
     preds = []
     for name, model in zip(model_names, models):
         pred = model.predict(X_scaled)[0]
         preds.append(pred)
         st.write(f"{name}: {labels[int(pred)]}")
 
-    # ---- Final Voting ----
+    preds = np.array(preds)
+
+    # ---- Hard Voting ----
     final = mode(preds, keepdims=False).mode
+
     st.subheader("Final Verdict")
     st.write(labels[int(final)])
 
-    # ---- Confidence (fraction of models agreeing) ----
-    confidence = np.sum(preds == final) / len(models)
-    st.write(f"Confidence: {confidence*100:.0f}%")
+    # ---- Confidence ----
+    confidence = np.sum(preds == final) / len(preds)
+    st.write(f"Confidence: {confidence * 100:.0f}%")
