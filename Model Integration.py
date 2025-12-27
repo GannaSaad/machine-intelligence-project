@@ -16,6 +16,9 @@ encoder = joblib.load("label_encoder.pkl")  # LabelEncoder
 models = [svm, lr, rf, knn]
 model_names = ["SVM", "Logistic Regression", "Random Forest", "kNN"]
 
+# Optional friendly names for display
+label_names = ['Away Win', 'Draw', 'Home Win']  
+
 feature_names = [
     'Half Time Home Goals',
     'Half Time Away Goals',
@@ -41,17 +44,18 @@ if st.button("Predict"):
     st.subheader("Individual Model Predictions")
     preds = []
 
+    # Get predictions for each model
     for name, model in zip(model_names, models):
         pred = model.predict(X_scaled)[0]
         preds.append(pred)
-        st.write(f"{name}: {encoder.inverse_transform([pred])[0]}")
+        st.write(f"{name}: {encoder.inverse_transform([pred])[0]} ({label_names[pred]})")
 
     preds = np.array(preds)
 
     # ---- Hard Voting ----
     final = mode(preds, keepdims=False).mode
     st.subheader("Final Verdict")
-    st.write(encoder.inverse_transform([final])[0])
+    st.write(f"{encoder.inverse_transform([final])[0]} ({label_names[final]})")
 
     # ---- Confidence ----
     confidence = np.sum(preds == final) / len(preds)
